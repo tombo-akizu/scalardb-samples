@@ -3,7 +3,9 @@
 このプロジェクトは、初期データをScalarDBデータベースにロードするマルチスレッドTCP/IPクライアントサーバーアプリケーションを示しています。
 
 ## プロジェクト構成
+my-multi-threadディレクトリにあります。
 
+```
 my-multi-thread/
 ├── build.gradle
 ├── database.properties
@@ -20,6 +22,7 @@ my-multi-thread/
 │ │ └── resources/
 │ │ └── logback.xml
 └── settings.gradle
+```
 
 ## 前提条件
 
