@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.scalar-labs:scalardb:3.12.2'
+    implementation 'org.slf4j:slf4j-simple:1.7.30'
+    testImplementation 'junit:junit:4.12'
+}
+
+application {
+    mainClassName = 'sample.Main'
+}
+
+task runServer(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'sample.Main'
+    args = ['server']
+}
+
+task runClient(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'sample.Main'
+    args = ['client']
+    standardInput = System.in
+}

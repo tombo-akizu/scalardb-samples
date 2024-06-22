@@ -1,0 +1,9 @@
+{
+  "your_namespace.user": {
+    "partition-key": ["user_id"],
+    "columns": {
+      "user_id": "INT",
+      "coin": "INT"
+    }
+  }
+}
