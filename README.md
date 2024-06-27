@@ -42,20 +42,20 @@ my-multi-thread/
 1. リポジトリをクローンします:
 
     ```sh
-    git clone <リポジトリURL>
-    cd my-multi-thread
+    $ git clone <リポジトリURL>
+    $ cd my-multi-thread
     ```
 
 2. Cassandraコンテナを起動します:
 
     ```sh
-    docker-compose up -d
+    $ docker-compose up -d
     ```
 
 3. データベーススキーマをロードします:
 
     ```sh
-    java -jar scalardb-schema-loader-3.12.2.jar --config database.properties --schema-file schema.json --coordinator
+    $ java -jar scalardb-schema-loader-3.12.2.jar --config database.properties --schema-file schema.json --coordinator
     ```
 
 ## ビルド
@@ -63,7 +63,7 @@ my-multi-thread/
 1. プロジェクトをビルドします:
 
     ```sh
-    ./gradlew build
+    $ ./gradlew build
     ```
 
 ## アプリケーションの実行
@@ -74,7 +74,7 @@ my-multi-thread/
 2. サーバーを起動します:
 
     ```sh
-    ./gradlew runServer
+    $ ./gradlew runServer
     ```
 
    次のような出力が表示されることを確認します:
@@ -89,7 +89,7 @@ my-multi-thread/
 2. クライアントを起動します:
 
     ```sh
-    ./gradlew runClient
+    $ ./gradlew runClient
     ```
 
 3. 次のプロンプトが表示されることを確認します:
@@ -202,10 +202,11 @@ Gradleビルド設定ファイルで、サーバーとクライアントを実�
 ### 複数データベースを起動
 docker-compose.ymlではMySQLとCassandraという2つのデータベースを起動する設定を記述している。
 
-### 移行手順
+### 移行方法
 database.propertiesで使用するデータベースを設定している。
 以下のコメントアウトを切り替えることで、使用するデータベースを移行することが可能です。
-```
+
+```properties
 # cassandraを使用する場合
 scalar.db.contact_points=127.0.0.1
 scalar.db.username=cassandra
@@ -222,3 +223,38 @@ scalar.db.table=user
 # scalar.db.namespace=your_namespace
 # scalar.db.table=user
 ```
+
+### 移行の確認手順
+
+1. MySQLとCassandraを起動する
+   
+   ```sh
+   $ docker-compose up -d
+   ```
+    
+2. MySQLにデータベーススキーマを設定
+   database.propertiesでCassndraを設定して、以下を実行
+   ※MySQLは一度スキーマをロードすると、再起動時にもう一度ロードする必要がない
+
+   ```sh 
+   java -jar scalardb-schema-loader-3.12.2.jar --config database.properties --schema-file schema.json --coordinator
+   ```
+
+
+3. Cassndraにデータベーススキーマを設定
+   database.propertiesでMySQLを設定して、以下を実行
+   ```sh 
+   java -jar scalardb-schema-loader-3.12.2.jar --config database.properties --schema-file schema.json --coordinator
+   ```
+
+3. プロジェクトをビルド (一度だけ実行すれば良い)
+   
+    ``` 
+    $./gradlew build
+    ```
+
+4. ゲームを実行し、ユーザのコイン数を変化させる
+   一方のターミナルで`$./gradlew runServer`を入力してサーバを立ち上げ, もう一方で`$./gradlew runClient`クライアントを立ち上げる。クライアント側で`GAME 1 100 1`を入力してゲームを実行し、コインを変動させる。
+
+5. データベースをCassndraに移行して、ユーザのコイン数をチェック
+   サーバとクライアントを落として、database.propertiesをCassndraに切り替える。その後、サーバとクライアントを立ち上げて、もう一度ゲームを実行する。クライアント側で`LOGIN 1`入力すると、コインは初期状態の100が返ってくる。以前のゲームによるコインの変動結果が反映されていないため、データベースの移行に成功していることが確認できる。
