@@ -11,6 +11,9 @@ dependencies {
     implementation 'com.scalar-labs:scalardb:3.12.2'
     implementation 'org.slf4j:slf4j-simple:1.7.30'
     testImplementation 'junit:junit:4.12'
+    implementation 'mysql:mysql-connector-java:8.0.23'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.2'
+    implementation 'info.picocli:picocli:4.7.1'
 }
 
 application {

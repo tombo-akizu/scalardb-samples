@@ -194,3 +194,28 @@ Gradleビルド設定ファイルで、サーバーとクライアントを実�
 - 受信情報をもとに勝敗を判定
 - データベースにアクセスし、勝敗に基づいてコイン数を変動
 - 勝敗とコイン数をクライアントに送信
+
+## データベースの移行
+このアプリケーションでは物理データベースを簡単に移行することが可能です。
+例えば、ユーザ数の増加に伴い、リレーショナルデータベースであるMySQLから、よりスケーラブルなCassandraに移行する場合があります。
+
+### 移行手順
+database.propertiesで使用するデータベースを設定している。
+以下のコメントアウトを切り替えることで、使用するデータベースを移行することが可能です。
+```
+# cassandraを使用する場合
+scalar.db.contact_points=127.0.0.1
+scalar.db.username=cassandra
+scalar.db.password=cassandra
+scalar.db.storage=cassandra
+scalar.db.namespace=your_namespace
+scalar.db.table=user
+
+# MySQLを使用する場合
+# scalar.db.contact_points=jdbc:mysql://localhost:3306/
+# scalar.db.username=root
+# scalar.db.password=root
+# scalar.db.storage=jdbc
+# scalar.db.namespace=your_namespace
+# scalar.db.table=user
+```
