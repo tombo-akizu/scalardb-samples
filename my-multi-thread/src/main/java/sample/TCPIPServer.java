@@ -58,6 +58,7 @@ public class TCPIPServer {
             }
         }
         if (all_hand_decided) {
+            System.out.println("All Hand Decided");
             // With this implement, we can't process multiple matches...
             if (usersInRoom.get(0).get_hand() == usersInRoom.get(1).get_hand()) {
                 usersInRoom.forEach(u -> u.send_message("D"));
@@ -77,6 +78,7 @@ public class TCPIPServer {
                 new MultiGameRequestHandler(factory, usersInRoom.get(0).get_id(), MatchResult.LOSE, writer).run();
                 new MultiGameRequestHandler(factory, usersInRoom.get(1).get_id(), MatchResult.WIN, writer).run();
             }
+            usersInRoom.clear();
         }
     }
 }
