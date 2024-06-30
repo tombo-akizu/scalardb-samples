@@ -3,7 +3,7 @@
 ## 概要
 
 このプロジェクトは、マルチスレッドのサーバーとクライアントアプリケーションであり、ScalarDBを使用してデータベース操作を行います。サーバーはクライアントからのリクエストを処理し、ログインとゲームの操作を提供します。
-ゲームは丁半博打です。
+ゲームは丁半博打とじゃんけんです。
 
 ## プロジェクト構成
 
@@ -21,8 +21,10 @@ my-multi-thread/
 │ │ │ ├── Main.java
 │ │ │ ├── TCPIPClient.java
 │ │ │ ├── TCPIPServer.java
+│ │ │ ├── User.java
 │ │ │ └── command/
 │ │ │ ├── GameRequestHandler.java
+│ │ │ ├── MultiGameRequestHandler.java
 │ │ │ ├── LoginRequestHandler.java
 │ │ │ └── UserLoadInitialDataCommand.java
 │ │ └── resources/
@@ -129,6 +131,10 @@ my-multi-thread/
 
 クライアントからの接続を待ち受け、受信したメッセージをエコーするサーバーアプリケーションです。
 
+### User.java
+
+サーバーが管理する、対戦ゲームのルームにいるユーザーの情報です。
+
 ### UserLoadInitialDataCommand.java
 
 初期データをScalarDBデータベースにロードするコマンドです。
@@ -136,6 +142,10 @@ my-multi-thread/
 ### GameRequestHandler.java
 
 受信したゲーム開始リクエストを処理し、結果をデータベースに反映するクラスです。
+
+### MultiGameRequestHandler.java
+
+対戦ゲームの結果から、データベースを更新するクラスです。名前が悪いかもしれません。
 
 ### LoginRequestHandler.java
 
@@ -156,6 +166,12 @@ Gradleビルド設定ファイルで、サーバーとクライアントを実�
 - **ゲーム開始リクエスト**
 `GAME USER_ID COIN CHOICE`
 
+- **対戦ゲーム マッチング開始リクエスト**
+`MULTIGAME_MATCH USER_ID`
+
+- **対戦ゲーム 手選択リクエスト**
+`MULTIGAME_HAND USER_ID HAND`
+ただし、HANDは0, 2, または5とする。それぞれグー、チョキ、パーに対応する(指の本数)。
 
 ### サーバ→クライアントに送信：
 形式: `COMMAND STATE その他のパラメータ`
@@ -166,6 +182,16 @@ Gradleビルド設定ファイルで、サーバーとクライアントを実�
 
 - **ゲーム開始レスポンス**
 `GAME WIN/LOSE DICE1 DICE2 UPDATED_COIN`
+
+- **対戦ゲーム マッチング開始レスポンス**
+`M`
+
+- **対戦ゲーム マッチング完了・手要求レスポンス**
+`H`
+
+- **対戦ゲーム ゲーム完了レスポンス**
+`W`, `L`, または`D`
+それぞれ、win, lose, drawに対応
 
 ## サーバ側の受信時の挙動
 
