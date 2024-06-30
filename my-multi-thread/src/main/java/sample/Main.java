@@ -28,16 +28,17 @@ public class Main {
         if (args.length > 0 && args[0].equals("server")) {
             TCPIPServer server = new TCPIPServer(transactionFactory);
             new Thread(server::start).start();
-
-            // 初期データのロード
+        } else if (args.length > 0 && args[0].equals("client")) {
+            TCPIPClient.main(args);
+        } else if (args.length > 0 && args[0].equals("loadInitialData")) {
+            // データベースに初期データをロード
             try {
-                new UserLoadInitialDataCommand(storageFactory.getStorage()).run();
+                new UserLoadInitialDataCommand(transactionFactory).start();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (args.length > 0 && args[0].equals("client")) {
-            TCPIPClient.main(args);
-        } else {
+        }
+        else {
             System.out.println("Usage: java -jar myapp.jar <server|client>");
         }
     }

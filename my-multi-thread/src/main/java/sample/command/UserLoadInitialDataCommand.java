@@ -3,34 +3,42 @@ package sample.command;
 import com.scalar.db.api.Put;
 import com.scalar.db.io.IntValue;
 import com.scalar.db.api.DistributedStorage;
+import com.scalar.db.service.TransactionFactory;
+
+import com.scalar.db.exception.transaction.TransactionException;
 import com.scalar.db.exception.storage.ExecutionException;
 import com.scalar.db.io.Key;
+import com.scalar.db.api.DistributedTransaction;
+import com.scalar.db.api.DistributedTransactionManager;
 
-public class UserLoadInitialDataCommand implements Runnable {
-    private final DistributedStorage storage;
+public class UserLoadInitialDataCommand {
+    private final DistributedTransactionManager manager;
     private static final String NAMESPACE = "your_namespace";
     private static final String TABLE_NAME = "user";
 
-    public UserLoadInitialDataCommand(DistributedStorage storage) {
-        this.storage = storage;
+    public UserLoadInitialDataCommand(TransactionFactory factory) {
+        this.manager = factory.getTransactionManager();
     }
 
-    @Override
-    public void run() {
+    public void start() {
+        DistributedTransaction tx = null;
         try {
             // Insert initial data
-            Put put1 = new Put(new Key(new IntValue("user_id", 1)))
-                    .withValue(new IntValue("coin", 100))
+            tx = manager.start();
+            Put put1 = new Put(new Key(new IntValue("user_id", 3)))
+                    .withValue(new IntValue("coin", 300))
                     .forNamespace(NAMESPACE)
                     .forTable(TABLE_NAME);
-            storage.put(put1);
+            tx.put(put1);
 
-            Put put2 = new Put(new Key(new IntValue("user_id", 2)))
-                    .withValue(new IntValue("coin", 200))
+            Put put2 = new Put(new Key(new IntValue("user_id", 4)))
+                    .withValue(new IntValue("coin", 400))
                     .forNamespace(NAMESPACE)
                     .forTable(TABLE_NAME);
-            storage.put(put2);
-        } catch (ExecutionException e) {
+            tx.put(put2);
+
+            tx.commit();
+        } catch (TransactionException e) {
             e.printStackTrace();
         }
     }

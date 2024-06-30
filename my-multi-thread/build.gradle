@@ -32,3 +32,9 @@ task runClient(type: JavaExec) {
     args = ['client']
     standardInput = System.in
 }
+
+task loadInitialData(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'sample.Main'
+    args = ['loadInitialData']
+}
