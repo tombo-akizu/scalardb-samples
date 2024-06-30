@@ -1,7 +1,17 @@
-version: "3.5"
+version: '3.8'
 services:
   cassandra:
     image: cassandra:3.11
     container_name: "cassandra-1"
     ports:
       - "9042:9042"
+  mysql:
+    image: mysql:8.0
+    container_name: "mysql"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:

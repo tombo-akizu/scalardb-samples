@@ -9,28 +9,27 @@
 
 my-multi-threadディレクトリにあります。
 
-```
-my-multi-thread/
-├── build.gradle
-├── database.properties
-├── schema.json
-├── src/
-│ ├── main/
-│ │ ├── java/
-│ │ │ └── sample/
-│ │ │ ├── Main.java
-│ │ │ ├── TCPIPClient.java
-│ │ │ ├── TCPIPServer.java
-│ │ │ ├── User.java
-│ │ │ └── command/
-│ │ │ ├── GameRequestHandler.java
-│ │ │ ├── MultiGameRequestHandler.java
-│ │ │ ├── LoginRequestHandler.java
-│ │ │ └── UserLoadInitialDataCommand.java
-│ │ └── resources/
-│ │ └── logback.xml
-└── settings.gradle
-```
+    my-multi-thread/
+    ├── build.gradle
+    ├── database.properties
+    ├── schema.json
+    ├── src/
+    │ ├── main/
+    │ │ ├── java/
+    │ │ │ └── sample/
+    │ │ │ ├── Main.java
+    │ │ │ ├── TCPIPClient.java
+    │ │ │ ├── TCPIPServer.java
+    │ │ │ ├── User.java
+    │ │ │ └── command/
+    │ │ │ ├── GameRequestHandler.java
+    │ │ │ ├── MultiGameRequestHandler.java
+    │ │ │ ├── LoginRequestHandler.java
+    │ │ │ └── UserLoadInitialDataCommand.java
+    | | | └── UserTransitionDataCommand.java
+    │ │ └── resources/
+    │ │ └── logback.xml
+    └── settings.gradle
 
 ## 前提条件
 
@@ -43,32 +42,40 @@ my-multi-thread/
 
 1. リポジトリをクローンします:
 
-    ```sh
-    git clone <リポジトリURL>
-    cd my-multi-thread
-    ```
+```sh
+$git clone <リポジトリURL>
+$cd my-multi-thread
+```
 
 2. Cassandraコンテナを起動します:
 
-    ```sh
-    docker-compose up -d
-    ```
+```sh
+$docker-compose up -d
+```
 
 3. データベーススキーマをロードします:
 
-    ```sh
-    java -jar scalardb-schema-loader-3.12.2.jar --config database.properties --schema-file schema.json --coordinator
-    ```
+```sh
+$java -jar scalardb-schema-loader-3.12.2.jar --config database.properties --schema-file schema.json --coordinator
+```
 
 ## ビルド
 
 1. プロジェクトをビルドします:
 
-    ```sh
-    ./gradlew build
-    ```
+```sh
+$./gradlew build
+```
 
 ## アプリケーションの実行
+
+### 初期データをデータベースにロード
+
+以下のタスクを実行
+
+```sh
+$./gradlew loadInitialData
+```
 
 ### サーバー
 
@@ -76,7 +83,7 @@ my-multi-thread/
 2. サーバーを起動します:
 
     ```sh
-    ./gradlew runServer
+    $ ./gradlew runServer
     ```
 
    次のような出力が表示されることを確認します:
@@ -91,7 +98,7 @@ my-multi-thread/
 2. クライアントを起動します:
 
     ```sh
-    ./gradlew runClient
+    $./gradlew runClient
     ```
 
 3. 次のプロンプトが表示されることを確認します:
@@ -125,11 +132,11 @@ my-multi-thread/
 
 ### TCPIPClient.java
 
-サーバーに接続し、メッセージを送信し、サーバーの応答を表示するクライアントアプリケーションです。
+サーバーに接続し、リクエストを送信し、サーバーからのレスポンスを受信します。レスポンスごとに対応する処理を実行して、ユーザにCUIで表示します。
 
 ### TCPIPServer.java
 
-クライアントからの接続を待ち受け、受信したメッセージをエコーするサーバーアプリケーションです。
+クライアントからの接続を待ち受け、受信したリクエストに対応するハンドラを呼び出します。
 
 ### User.java
 
@@ -151,13 +158,30 @@ my-multi-thread/
 
 受信したログインリクエストを処理し、ユーザー情報をデータベースから取得するクラスです。
 
+### UserTransitionDataCommand.java
+
+データベース内のデータを移行するコマンドです。
+
 ### build.gradle
 
 Gradleビルド設定ファイルで、サーバーとクライアントを実行するタスクが含まれています。
 
+### schema.json
+
+データベースに格納するデータのスキーマです。
+
+### database.properties
+
+データベースのプロパティを設定しています。
+
+### docker-compose.yml
+
+Docker環境で立ち上げるデータベースコンテナを記述しています。
+
 ## 通信形式
 
 ### クライアント→サーバに送信：
+
 形式: `COMMAND USER_ID その他のパラメータ`
 
 - **ログインリクエスト**
@@ -174,6 +198,7 @@ Gradleビルド設定ファイルで、サーバーとクライアントを実�
 ただし、HANDは0, 2, または5とする。それぞれグー、チョキ、パーに対応する(指の本数)。
 
 ### サーバ→クライアントに送信：
+
 形式: `COMMAND STATE その他のパラメータ`
 
 - **ログインレスポンス**
@@ -204,19 +229,67 @@ Gradleビルド設定ファイルで、サーバーとクライアントを実�
 ### サーバ側で必要なクラス
 
 #### メインクラス
+
 役割: ルーティング
 
 - ポートで待ち構えて、受信したクエリをパースし、適切なクエリクラスを呼び出す
 
 #### ログインクラス
+
 `LOGIN USER_ID`に反応して呼び出される。
 
 - データベースにアクセスして、適切なユーザと現在のコイン数を取得
 - 取得した情報をクライアントに送信
 
 #### ゲームクラス
+
 `GAME USER_ID COIN CHOICE`に反応して呼び出される。
 
 - 受信情報をもとに勝敗を判定
 - データベースにアクセスし、勝敗に基づいてコイン数を変動
 - 勝敗とコイン数をクライアントに送信
+
+## データベースの移行
+
+このアプリケーションでは物理データベースを簡単に移行することが可能です。
+サンプルでは、ユーザ数の増加に伴い、リレーショナルデータベースであるMySQLから、よりスケーラブルなCassandraに移行するケースを想定しています。
+
+### 複数データベースを起動
+
+docker-compose.ymlではMySQLとCassandraという2つのデータベースを起動する設定を記述している。
+
+### データベースの移行のための設定
+
+database.propertiesではデータベースの名前空間へのマッピングを設定している。MySQLはnamespace1, Cassandraはnamespace2にマッピングしている。
+
+```
+## 名前空間マッピング
+scalar.db.multi_storage.namespace_mapping=namespace1:mysql,namespace2:cassandra,coordinator:mysql
+```
+また、schema.jsonでは、各名前空間についてuserテーブルを定義している。
+
+### データベースの移行手順
+
+#### データ自体の移行
+
+既に保存してあるデータの移行手順を示す。以下のタスクを実行することで、MySQLからCassandraへデータをコピーすることが可能だ。
+
+```sh
+$./gradlew transitionData
+```
+
+#### サーバがアクセスするデータベースを変更
+
+以降にサーバがアクセスするデータベースをMySQLからCassandraに変更する。build.gradle内のrunServerタスク内の環境変数をnamespace2に変更することで、これを実現できる。
+
+```properties
+task runServer(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'sample.Main'
+    args = ['server']
+    // 環境変数を設定
+    // サーバ内でデータを読み書きする名前空間を設定
+    // namespace1を指定するとMySQL、namespace2を指定するとCassandraにアクセス
+    environment 'NAMESPACE', 'namespace2' # <= 'namespace1
+}
+```

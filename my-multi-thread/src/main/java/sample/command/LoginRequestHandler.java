@@ -16,6 +16,8 @@ public class LoginRequestHandler implements Runnable {
     private final DistributedTransactionManager manager;
     private final int userId;
     private final PrintWriter writer;
+    private static final String NAMESPACE = System.getenv("NAMESPACE");
+    private static final String TABLE_NAME = "user";
 
     public LoginRequestHandler(TransactionFactory factory, int userId, PrintWriter writer) {
         this.manager = factory.getTransactionManager();
@@ -29,8 +31,8 @@ public class LoginRequestHandler implements Runnable {
         try {
             tx = manager.start();
             Get get = new Get(new Key(new IntValue("user_id", userId)))
-                    .forNamespace("your_namespace")
-                    .forTable("user");
+                    .forNamespace(NAMESPACE)
+                    .forTable(TABLE_NAME);
             Optional<Result> result = tx.get(get);
 
             if (result.isPresent()) {

@@ -20,6 +20,8 @@ public class GameRequestHandler implements Runnable {
     private final int coin;
     private final int choice;
     private final PrintWriter writer;
+    private static final String NAMESPACE = System.getenv("NAMESPACE");
+    private static final String TABLE_NAME = "user";
 
     public GameRequestHandler(TransactionFactory factory, int userId, int coin, int choice, PrintWriter writer) {
         this.manager = factory.getTransactionManager();
@@ -36,8 +38,8 @@ public class GameRequestHandler implements Runnable {
             tx = manager.start();
             // ユーザ情報を取得
             Get get = new Get(new Key(new IntValue("user_id", userId)))
-                    .forNamespace("your_namespace")
-                    .forTable("user");
+                    .forNamespace(NAMESPACE)
+                    .forTable(TABLE_NAME);
             Optional<Result> result = tx.get(get);
 
             if (result.isPresent()) {
@@ -55,8 +57,8 @@ public class GameRequestHandler implements Runnable {
                 // データベースに更新
                 Put put = new Put(new Key(new IntValue("user_id", userId)))
                         .withValue(new IntValue("coin", updatedCoin))
-                        .forNamespace("your_namespace")
-                        .forTable("user");
+                        .forNamespace(NAMESPACE)
+                        .forTable(TABLE_NAME);
                 tx.put(put);
 
                 // 結果をクライアントに送信
