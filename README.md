@@ -252,13 +252,13 @@ scalar.db.table=user
 
 ### 移行の確認手順
 
-1. MySQLとCassandraを起動する
+1. MySQLとCassandraを起動する。
    
    ```sh
    $ docker-compose up -d
    ```
     
-2. MySQLにデータベーススキーマを設定
+2. Cassndraにデータベーススキーマを設定する。
    database.propertiesでCassndraを設定して、以下を実行
    ※MySQLは一度スキーマをロードすると、再起動時にもう一度ロードする必要がない
 
@@ -267,20 +267,20 @@ scalar.db.table=user
    ```
 
 
-3. Cassndraにデータベーススキーマを設定
+3. MySQLにデータベーススキーマを設定する。
    database.propertiesでMySQLを設定して、以下を実行
    ```sh 
    java -jar scalardb-schema-loader-3.12.2.jar --config database.properties --schema-file schema.json --coordinator
    ```
 
-3. プロジェクトをビルド (一度だけ実行すれば良い)
+4. プロジェクトをビルド (一度だけ実行すれば良い)
    
     ``` 
     $./gradlew build
     ```
 
-4. ゲームを実行し、ユーザのコイン数を変化させる
+5. ゲームを実行し、ユーザのコイン数を変化させる
    一方のターミナルで`$./gradlew runServer`を入力してサーバを立ち上げ, もう一方で`$./gradlew runClient`クライアントを立ち上げる。クライアント側で`GAME 1 100 1`を入力してゲームを実行し、コインを変動させる。
 
-5. データベースをCassndraに移行して、ユーザのコイン数をチェック
+6. データベースをCassndraに移行して、ユーザのコイン数をチェック
    サーバとクライアントを落として、database.propertiesをCassndraに切り替える。その後、サーバとクライアントを立ち上げて、もう一度ゲームを実行する。クライアント側で`LOGIN 1`入力すると、コインは初期状態の100が返ってくる。以前のゲームによるコインの変動結果が反映されていないため、データベースの移行に成功していることが確認できる。
