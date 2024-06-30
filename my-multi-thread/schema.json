@@ -1,12 +1,12 @@
 {
-  "your_namespace.user": {
+  "namespace1.user": {
     "partition-key": ["user_id"],
     "columns": {
       "user_id": "INT",
       "coin": "INT"
     }
   },
-  "old_namespace.user": {
+  "namespace2.user": {
     "partition-key": ["user_id"],
     "columns": {
       "user_id": "INT",

@@ -4,6 +4,7 @@ import com.scalar.db.config.DatabaseConfig;
 import com.scalar.db.service.StorageFactory;
 import com.scalar.db.service.TransactionFactory;
 import sample.command.UserLoadInitialDataCommand;
+import sample.command.UserTransitionDataCommand;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,6 +35,13 @@ public class Main {
             // データベースに初期データをロード
             try {
                 new UserLoadInitialDataCommand(transactionFactory).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (args.length > 0 && args[0].equals("transitionData")) {
+            // 2つのデータベース間でデータを移行
+            try {
+                new UserTransitionDataCommand(transactionFactory).start();
             } catch (Exception e) {
                 e.printStackTrace();
             }

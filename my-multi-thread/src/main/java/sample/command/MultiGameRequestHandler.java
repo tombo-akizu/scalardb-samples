@@ -15,11 +15,15 @@ import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.Random;
 
+import javax.print.attribute.standard.MediaSize.NA;
+
 public class MultiGameRequestHandler implements Runnable {
     private final DistributedTransactionManager manager;
     private final int userId;
     private final MatchResult matchResult;
     private final PrintWriter writer;
+    private static final String NAMESPACE = System.getenv("NAMESPACE");
+    private static final String TABLE_NAME = "user";
 
     public enum MatchResult {
         WIN,
@@ -41,8 +45,8 @@ public class MultiGameRequestHandler implements Runnable {
             tx = manager.start();
             // ユーザ情報を取得
             Get get = new Get(new Key(new IntValue("user_id", userId)))
-                    .forNamespace("your_namespace")
-                    .forTable("user");
+                    .forNamespace(NAMESPACE)
+                    .forTable(TABLE_NAME);
             Optional<Result> result = tx.get(get);
 
             if (result.isPresent()) {
@@ -58,8 +62,8 @@ public class MultiGameRequestHandler implements Runnable {
                 // データベースに更新
                 Put put = new Put(new Key(new IntValue("user_id", userId)))
                         .withValue(new IntValue("coin", updatedCoin))
-                        .forNamespace("your_namespace")
-                        .forTable("user");
+                        .forNamespace(NAMESPACE)
+                        .forTable(TABLE_NAME);
                 tx.put(put);
             } else {
                 writer.println("User not found");

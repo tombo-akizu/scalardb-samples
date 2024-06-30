@@ -24,6 +24,10 @@ task runServer(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'sample.Main'
     args = ['server']
+    // 環境変数を設定
+    // サーバ内でデータを読み書きする名前空間を設定
+    // namespace1を指定するとMySQL、namespace2を指定するとCassandraにアクセス
+    environment 'NAMESPACE', 'namespace2'
 }
 
 task runClient(type: JavaExec) {
@@ -37,4 +41,17 @@ task loadInitialData(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'sample.Main'
     args = ['loadInitialData']
+    // 環境変数を設定
+    // 初期データをロードする名前空間を設定
+    environment 'NAMESPACE', 'namespace1'
+}
+
+task transitionData(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'sample.Main'
+    args = ['transitionData']
+    // 環境変数を設定
+    // namespace1からnamespace2にデータを移行
+    environment 'SOURCE_NAMESPACE', 'namespace1'
+    environment 'DESTINATION_NAMESPACE', 'namespace2'
 }

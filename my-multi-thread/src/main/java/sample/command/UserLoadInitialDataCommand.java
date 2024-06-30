@@ -13,7 +13,7 @@ import com.scalar.db.api.DistributedTransactionManager;
 
 public class UserLoadInitialDataCommand {
     private final DistributedTransactionManager manager;
-    private static final String NAMESPACE = "your_namespace";
+    private static final String NAMESPACE = System.getenv("NAMESPACE");
     private static final String TABLE_NAME = "user";
 
     public UserLoadInitialDataCommand(TransactionFactory factory) {
@@ -40,6 +40,8 @@ public class UserLoadInitialDataCommand {
             tx.commit();
         } catch (TransactionException e) {
             e.printStackTrace();
+        } finally {
+            manager.close();
         }
     }
 }
