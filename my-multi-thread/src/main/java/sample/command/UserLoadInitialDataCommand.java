@@ -25,14 +25,14 @@ public class UserLoadInitialDataCommand {
         try {
             // Insert initial data
             tx = manager.start();
-            Put put1 = new Put(new Key(new IntValue("user_id", 3)))
-                    .withValue(new IntValue("coin", 300))
+            Put put1 = new Put(new Key(new IntValue("user_id", 1)))
+                    .withValue(new IntValue("coin", 100))
                     .forNamespace(NAMESPACE)
                     .forTable(TABLE_NAME);
             tx.put(put1);
 
-            Put put2 = new Put(new Key(new IntValue("user_id", 4)))
-                    .withValue(new IntValue("coin", 400))
+            Put put2 = new Put(new Key(new IntValue("user_id", 2)))
+                    .withValue(new IntValue("coin", 200))
                     .forNamespace(NAMESPACE)
                     .forTable(TABLE_NAME);
             tx.put(put2);
