@@ -41,6 +41,7 @@ public class TCPIPServer {
         if (usersInRoom.size() == ROOM_SIZE) {
             usersInRoom.forEach(u -> u.send_message("Game matched!"));
             usersInRoom.forEach(u -> u.send_message("H"));
+            System.out.println("Match!");
         }
     }
 

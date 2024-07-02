@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 
 public class TCPIPClient extends JFrame {
     private JTextField idField;
+    private JTextField midField;
     private JTextField betField;
     private String userId;
     private PrintWriter writer;
@@ -59,9 +60,6 @@ public class TCPIPClient extends JFrame {
     }
 
     private void initSelectPanel() {
-        JLabel idLabel = new JLabel("Your ID");
-        idField = new JTextField(30);
-        idField.setBounds(340, 280, 200, 50);
         JButton gameButton = createTransparentButton("", 0, 0, 400, 450);
         JButton matchButton = createTransparentButton("", 400, 0, 400, 450);
 
@@ -118,19 +116,19 @@ public class TCPIPClient extends JFrame {
     }
 
     private void initMatchPanel() {
-        JLabel idLabel = new JLabel("Your ID");
-        idField = new JTextField(30);
-        idField.setBounds(340, 280, 200, 50);
+        JLabel midLabel = new JLabel("Your ID");
+        midField = new JTextField(30);
+        midField.setBounds(340, 280, 200, 50);
         JButton matchButton = createTransparentButton("", 320, 340, 160, 30);
 
         matchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                userId = idField.getText();
+                userId = midField.getText();
                 if (userId != null && !userId.isEmpty()) {
                     if (writer != null) {
                         writer.println("MULTIGAME_MATCH " + userId);
-                        cardLayout.show(mainPanel, "waiting");
+                        cardLayout.show(mainPanel, "waitingPanel");
                     } else {
                         // outputArea.append("Error: Not connected to server.\n");
                     }
@@ -140,8 +138,8 @@ public class TCPIPClient extends JFrame {
 
         BackgroundPanel matchPanel = new BackgroundPanel("src/main/java/sample/images/multi_match.png");
         matchPanel.setLayout(null);
-        matchPanel.add(idLabel);
-        matchPanel.add(idField);
+        matchPanel.add(midLabel);
+        matchPanel.add(midField);
         matchPanel.add(matchButton);
         mainPanel.add(matchPanel, "matchPanel");
     }
@@ -187,9 +185,8 @@ public class TCPIPClient extends JFrame {
     }
 
     private void initMultiPanel() {
-        BackgroundPanel multiPanel = new BackgroundPanel("src/main/java/sample/images/game.png");
-        multuPanel.setLayout(null); // Absolute layout for positioning buttons
-        multiPanel.add(coinLabel);
+        BackgroundPanel multiPanel = new BackgroundPanel("src/main/java/sample/images/multi_choose.png");
+        multiPanel.setLayout(null); // Absolute layout for positioning buttons
 
         JButton brockButton = createTransparentButton("", 0, 50, 200, 150);
         brockButton.addActionListener(new ActionListener() {
@@ -266,10 +263,7 @@ public class TCPIPClient extends JFrame {
         retryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                userId = idField.getText();
-                if (userId != null && !userId.isEmpty()) {
                     cardLayout.show(mainPanel, "matchPanel");
-                }
             }
         });
 
@@ -332,19 +326,21 @@ public class TCPIPClient extends JFrame {
                             }
                         }
 
-                        if (parts[0].equals("GAME")) {
+                        if (parts[0].equals("GAME") && !(parts[1].equals("matched!"))) {
                             SwingUtilities.invokeLater(() -> {
                                 handleGameResponse(parts);
                             });
                         }
 
                         if (parts.length == 1) {
-                            if (parts[0] == "H") {
+                            if (parts[0].equals("H")) {
                                 cardLayout.show(mainPanel, "multiPanel");
-                            } else if (parts[0] != "M") {
+                            } else if (parts[0].equals("W") || parts[0].equals("D") || parts[0].equals("L") ) {
                                 SwingUtilities.invokeLater(() -> {
                                 handleMultiResponse(parts);
-                            });   
+                                });   
+                            } else { 
+                                System.out.println(response);
                             }
                         }
 
