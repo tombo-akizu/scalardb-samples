@@ -51,12 +51,9 @@ public class TCPIPClient extends JFrame {
         initResultPanel("src/main/java/sample/images/han_lose.png", "resultHL", resultCoinLabel3);
         resultCoinLabel4 = new JLabel("Your Coin");
         initResultPanel("src/main/java/sample/images/han_win.png", "resultHW", resultCoinLabel4);
-        resultCoinLabel5 = new JLabel("Your Coin");
-        initResultPanel("src/main/java/sample/images/multi_win.png", "resultW", resultCoinLabel5);
-        resultCoinLabel6 = new JLabel("Your Coin");
-        initResultPanel("src/main/java/sample/images/multi_draw.png", "resultD", resultCoinLabel6);
-        resultCoinLabel7 = new JLabel("Your Coin");
-        initResultPanel("src/main/java/sample/images/multi_lose.png", "resultL", resultCoinLabel7);
+        initMResultPanel("src/main/java/sample/images/multi_win.png", "resultW");
+        initMResultPanel("src/main/java/sample/images/multi_draw.png", "resultD");
+        initMResultPanel("src/main/java/sample/images/multi_lose.png", "resultL");
 
         getContentPane().add(mainPanel);
     }
@@ -146,10 +143,14 @@ public class TCPIPClient extends JFrame {
         matchPanel.add(idLabel);
         matchPanel.add(idField);
         matchPanel.add(matchButton);
-
         mainPanel.add(matchPanel, "matchPanel");
     }
-    
+
+    private void initWaitingPanel() {
+        // サーバーからのメッセージでmultiPanelに遷移
+        BackgroundPanel waitingPanel = new BackgroundPanel("src/main/java/sample/images/multi_wait.png");
+        mainPanel.add(waitingPanel, "waitingPanel");
+    }
 
     private void initGamePanel() {
         BackgroundPanel gamePanel = new BackgroundPanel("src/main/java/sample/images/game.png");
@@ -185,6 +186,51 @@ public class TCPIPClient extends JFrame {
         mainPanel.add(gamePanel, "gamePanel");
     }
 
+    private void initMultiPanel() {
+        BackgroundPanel multiPanel = new BackgroundPanel("src/main/java/sample/images/game.png");
+        multuPanel.setLayout(null); // Absolute layout for positioning buttons
+        multiPanel.add(coinLabel);
+
+        JButton brockButton = createTransparentButton("", 0, 50, 200, 150);
+        brockButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMultiMessage(0);
+                cardLayout.show(mainPanel, "wait0");
+            }
+        });
+
+        JButton paperButton = createTransparentButton("", 0, 250, 200, 150);
+        paperButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMultiMessage(5);
+                cardLayout.show(mainPanel, "wait5");
+            }
+        });
+
+        JButton cissorsButton = createTransparentButton("", 600, 100, 200, 250);
+        cissorsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMultiMessage(2);
+                cardLayout.show(mainPanel, "wait2");
+            }
+        });
+
+
+        multiPanel.add(brockButton);
+        multiPanel.add(paperButton);
+        multiPanel.add(cissorsButton);
+        mainPanel.add(multiPanel, "multiPanel");
+    }
+
+    private void initMultiWaitingPanel(String imagePath, String panelName) {
+        BackgroundPanel waitingPanel = new BackgroundPanel(imagePath);
+        waitingPanel.setLayout(null);
+        mainPanel.add(waitingPanel, panelName);
+    }
+
     private void initResultPanel(String imagePath, String panelName, JLabel resultCoinLabel) {
         resultCoinLabel.setBounds(350, 265, 200, 50);
         JButton retryButton = createTransparentButton("", 280, 325, 100, 30);
@@ -209,6 +255,34 @@ public class TCPIPClient extends JFrame {
         BackgroundPanel resultPanel = new BackgroundPanel(imagePath);
         resultPanel.setLayout(null);
         resultPanel.add(resultCoinLabel);
+        resultPanel.add(retryButton);
+        resultPanel.add(exitButton);
+
+        mainPanel.add(resultPanel, panelName);
+    }
+
+    private void initMResultPanel(String imagePath, String panelName) {
+        JButton retryButton = createTransparentButton("", 280, 325, 100, 30);
+        retryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                userId = idField.getText();
+                if (userId != null && !userId.isEmpty()) {
+                    cardLayout.show(mainPanel, "matchPanel");
+                }
+            }
+        });
+
+        JButton exitButton = createTransparentButton("", 420, 325, 100, 30);
+        exitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+        BackgroundPanel resultPanel = new BackgroundPanel(imagePath);
+        resultPanel.setLayout(null);
         resultPanel.add(retryButton);
         resultPanel.add(exitButton);
 
@@ -263,6 +337,17 @@ public class TCPIPClient extends JFrame {
                                 handleGameResponse(parts);
                             });
                         }
+
+                        if (parts.length == 1) {
+                            if (parts[0] == "H") {
+                                cardLayout.show(mainPanel, "multiPanel");
+                            } else if (parts[0] != "M") {
+                                SwingUtilities.invokeLater(() -> {
+                                handleMultiResponse(parts);
+                            });   
+                            }
+                        }
+
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -272,6 +357,11 @@ public class TCPIPClient extends JFrame {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void sendMultiMessage(int choice) {
+        String message = "MULTIGAME_HAND " + userId + " " + choice;
+        writer.println(message);
     }
 
     private void sendGameMessage(int choice) {
@@ -302,6 +392,21 @@ public class TCPIPClient extends JFrame {
         } else if (parts[1].equals("LOSE") && (Integer.parseInt(parts[2]) + Integer.parseInt(parts[3])) % 2 == 1) {
             resultCoinLabel3.setText("Your Coin: " + parts[4]);
             cardLayout.show(mainPanel, "resultHL");
+        }
+    }
+
+    private void handleMultiResponse(String[] parts) {
+        if (parts.length != 1) {
+            System.err.println("Invalid response from server: " + String.join(" ", parts));
+            return;
+        }
+
+        if (parts[0].equals("W")) {
+            cardLayout.show(mainPanel, "resultW");
+        } else if (parts[0].equals("D")) {
+            cardLayout.show(mainPanel, "resultD");
+        } else if (parts[0].equals("L")) {
+            cardLayout.show(mainPanel, "resultL");
         }
     }
 
