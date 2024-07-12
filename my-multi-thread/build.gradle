@@ -27,7 +27,7 @@ task runServer(type: JavaExec) {
     // 環境変数を設定
     // サーバ内でデータを読み書きする名前空間を設定
     // namespace1を指定するとMySQL、namespace2を指定するとCassandraにアクセス
-    environment 'NAMESPACE', 'namespace2'
+    environment 'NAMESPACE', 'namespace1'
 }
 
 task runClient(type: JavaExec) {
